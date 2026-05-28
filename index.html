@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz SEF Mobile – Donnes réelles – Niveau moyen</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --primary:#2563eb;
+      --primary-dark:#1d4ed8;
+      --green:#16a34a;
+      --red:#dc2626;
+      --border:#dbe4f0;
+      --shadow:0 12px 30px rgba(15,23,42,.08);
+      --radius:20px;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,#eef4ff 0%, #f8fbff 100%);
+      color:var(--text);
+    }
+
+    .app{
+      max-width:900px;
+      margin:0 auto;
+      padding:14px 14px 40px;
+    }
+
+    .header{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:16px;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:clamp(1.4rem,3vw,2rem);
+      line-height:1.15;
+    }
+
+    .subtitle{
+      color:var(--muted);
+      line-height:1.5;
+      font-size:.98rem;
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+
+    .meta{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      margin-bottom:12px;
+    }
+
+    .badge{
+      background:#eff6ff;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:.95rem;
+    }
+
+    .progress-wrap{
+      width:100%;
+      height:12px;
+      border-radius:999px;
+      background:#e5edf8;
+      overflow:hidden;
+      margin:10px 0 14px;
+    }
+
+    .progress{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,#2563eb,#60a5fa);
+      transition:width .25s ease;
+    }
+
+    .deal-card{
+      background:#f8fbff;
+      border:1px solid #dbeafe;
+      border-radius:20px;
+      padding:14px;
+      margin:10px 0 14px;
+    }
+
+    .deal-title{
+      font-weight:800;
+      margin-bottom:10px;
+      color:#0f172a;
+    }
+
+    .table-layout{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+
+    @media (min-width: 720px){
+      .table-layout{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    .hand{
+      background:#ffffff;
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:12px;
+    }
+
+    .hand h3{
+      margin:0 0 8px;
+      font-size:1rem;
+    }
+
+    .suit{
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+      margin:4px 0;
+      font-size:1rem;
+      line-height:1.5;
+      word-break:break-word;
+    }
+
+    .sym{
+      width:24px;
+      font-weight:800;
+      flex:0 0 24px;
+    }
+
+    .spade,.club{ color:#111827; }
+    .heart,.diamond{ color:#c81e1e; }
+
+    .context{
+      margin-top:10px;
+      color:#374151;
+      font-size:.98rem;
+      line-height:1.5;
+    }
+
+    .question{
+      font-size:1.1rem;
+      font-weight:800;
+      line-height:1.4;
+      margin:16px 0 12px;
+    }
+
+    .answers{
+      display:grid;
+      gap:10px;
+    }
+
+    .answer{
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:16px;
+      cursor:pointer;
+      text-align:left;
+      background:#fff;
+      border:1px solid var(--border);
+      color:var(--text);
+      font-size:1rem;
+      font-weight:700;
+      transition:.18s;
+    }
+
+    .answer:hover{
+      transform:translateY(-1px);
+      border-color:#93c5fd;
+    }
+
+    .answer.correct{
+      background:#ecfdf5;
+      border-color:#86efac;
+      color:#166534;
+    }
+
+    .answer.wrong{
+      background:#fef2f2;
+      border-color:#fca5a5;
+      color:#991b1b;
+    }
+
+    .feedback{
+      display:none;
+      margin-top:14px;
+      padding:14px;
+      border-radius:16px;
+      line-height:1.6;
+    }
+
+    .feedback.show{ display:block; }
+    .feedback.ok{
+      background:#f0fdf4;
+      border:1px solid #bbf7d0;
+    }
+    .feedback.bad{
+      background:#fef2f2;
+      border:1px solid #fecaca;
+    }
+
+    .controls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    .btn{
+      flex:1 1 180px;
+      padding:14px 16px;
+      border:none;
+      border-radius:16px;
+      cursor:pointer;
+      font-size:1rem;
+      font-weight:800;
+    }
+
+    .btn-primary{
+      background:var(--primary);
+      color:white;
+    }
+
+    .btn-primary:hover{
+      background:var(--primary-dark);
+    }
+
+    .btn-secondary{
+      background:#e5edf8;
+      color:#111827;
+    }
+
+    .result{
+      display:none;
+      margin-top:20px;
+      background:#f8fafc;
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .result.show{ display:block; }
+
+    .result h2{
+      margin-top:0;
+      margin-bottom:8px;
+    }
+
+    .small{
+      color:var(--muted);
+      line-height:1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <h1>Quiz SEF 2024 – Donnes réelles – Niveau moyen</h1>
+      <div class="subtitle">
+        Quiz mobile d’entraînement avec mains de bridge présentées sous forme de donnes réalistes.
+        Réponse immédiate, explication pédagogique et score final.
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="meta">
+        <div class="badge" id="qInfo">Question 1 / 12</div>
+        <div class="badge" id="scoreInfo">Score : 0</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress" id="progressBar"></div>
+      </div>
+
+      <div class="deal-card">
+        <div class="deal-title" id="dealTitle">Donne</div>
+
+        <div class="table-layout" id="dealBox"></div>
+
+        <div class="context" id="contextBox"></div>
+      </div>
+
+      <div class="question" id="questionBox"></div>
+      <div class="answers" id="answersBox"></div>
+      <div class="feedback" id="feedbackBox"></div>
+
+      <div class="controls">
+        <button class="btn btn-secondary" id="restartBtn">Recommencer</button>
+        <button class="btn btn-primary" id="nextBtn" disabled>Question suivante</button>
+      </div>
+
+      <div class="result" id="resultBox"></div>
+    </div>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        title: "Donne 1 – Ouverture régulière",
+        hands: [
+          {
+            seat: "Sud (votre main)",
+            spades: "R 8 4",
+            hearts: "A D 7",
+            diamonds: "V 10 5",
+            clubs: "A V 8 3"
+          }
+        ],
+        context: "Vous êtes donneur. Personne n’a parlé. Main régulière de 16H.",
+        question: "Quelle est l’ouverture correcte ?",
+        answers: ["1♣", "1SA", "2SA", "2♣"],
+        correct: 1,
+        explanation: "Avec une main équilibrée de 15 à 17H, l’ouverture standard du SEF est 1SA."
+      },
+      {
+        title: "Donne 2 – Main très forte régulière",
+        hands: [
+          {
+            seat: "Sud (votre main)",
+            spades: "A D 9",
+            hearts: "R V 7",
+            diamonds: "A D 4",
+            clubs: "R 10 8 2"
+          }
+        ],
+        context: "Vous êtes donneur. Personne n’a parlé. Main régulière de 20H.",
+        question: "Quelle est l’ouverture correcte ?",
+        answers: ["1SA", "2SA", "2♣", "1♦"],
+        correct: 1,
+        explanation: "Avec 20–21H réguliers, l’ouverture standard est 2SA."
+      },
+      {
+        title: "Donne 3 – Réponse sur 1SA",
+        hands: [
+          {
+            seat: "Nord (répondant)",
+            spades: "7 4",
+            hearts: "R V 10 8 5",
+            diamonds: "9 6 4",
+            clubs: "D 10 3"
+          }
+        ],
+        context: "Votre partenaire ouvre 1SA. Vous détenez 5 cartes à cœur.",
+        question: "Quelle est la réponse standard ?",
+        answers: ["2♣ Stayman", "2♦ Texas vers les cœurs", "2♥ Texas vers les piques", "3♥"],
+        correct: 1,
+        explanation: "Sur 1SA, 2♦ est le Texas pour les cœurs avec 5+ cartes à cœur."
+      },
+      {
+        title: "Donne 4 – Recherche d’une majeure",
+        hands: [
+          {
+            seat: "Nord (répondant)",
+            spades: "D V 7 4",
+            hearts: "R 8 6 3",
+            diamonds: "7 5",
+            clubs: "D 9 3"
+          }
+        ],
+        context: "Votre partenaire ouvre 1SA. Vous cherchez à savoir s’il a une majeure quatrième.",
+        question: "Quelle convention utilisez-vous ?",
+        answers: ["2♣ Stayman", "2♦ Texas", "4♣ Gerber", "2SA"],
+        correct: 0,
+        explanation: "Le Stayman à 2♣ sert à rechercher une majeure quatrième chez l’ouvreur de 1SA."
+      },
+      {
+        title: "Donne 5 – Soutien simple après 1♥",
+        hands: [
+          {
+            seat: "Nord (répondant)",
+            spades: "9 8 4",
+            hearts: "V 7 5",
+            diamonds: "D 10 8 3",
+            clubs: "R 9 4"
+          }
+        ],
+        context: "Votre partenaire ouvre 1♥. Vous avez 7H et 3 cartes à cœur.",
+        question: "Quelle réponse correspond au système ?",
+        answers: ["1SA", "2♥", "2SA", "3♥"],
+        correct: 1,
+        explanation: "Après 1♥, 2♥ montre un soutien direct avec 3+ atouts et environ 6–9H."
+      },
+      {
+        title: "Donne 6 – Nouvelle couleur après 1♥",
+        hands: [
+          {
+            seat: "Nord (répondant)",
+            spades: "D 10 8 7",
+            hearts: "6 4",
+            diamonds: "R 9 6",
+            clubs: "V 10 8 4"
+          }
+        ],
+        context: "Votre partenaire ouvre 1♥. Vous avez 4 piques et 6H.",
+        question: "Quelle est la réponse naturelle forcing d’un tour ?",
+        answers: ["1♠", "1SA", "2♠", "3♠"],
+        correct: 0,
+        explanation: "Après 1♥, 1♠ montre 4+ piques avec 6+H et force pour un tour."
+      },
+      {
+        title: "Donne 7 – Réponse tranquille sur 1♦",
+        hands: [
+          {
+            seat: "Nord (répondant)",
+            spades: "8 7 4",
+            hearts: "D 10 6",
+            diamonds: "9 5 3",
+            clubs: "R V 8 2"
+          }
+        ],
+        context: "Votre partenaire ouvre 1♦. Vous avez une main régulière de 8H, sans majeure quatrième.",
+        question: "Quelle réponse est correcte ?",
+        answers: ["1SA", "2♣", "2♦", "2SA"],
+        correct: 0,
+        explanation: "Après 1♦, 1SA montre 7–10H réguliers sans majeure quatrième."
+      },
+      {
+        title: "Donne 8 – Main forte artificielle",
+        hands: [
+          {
+            seat: "Sud (votre main)",
+            spades: "A R D 5",
+            hearts: "A D 8",
+            diamonds: "R 7",
+            clubs: "A R 9 4"
+          }
+        ],
+        context: "Vous êtes donneur. Personne n’a parlé. Vous avez 23H.",
+        question: "Quelle ouverture correspond au système ?",
+        answers: ["2♣", "2♦", "2SA", "1SA"],
+        correct: 0,
+        explanation: "L’ouverture 2♣ est forte artificielle avec 22+H ou une main équivalente."
+      },
+      {
+        title: "Donne 9 – Réponse négative sur 2♣",
+        hands: [
+          {
+            seat: "Nord (répondant)",
+            spades: "9 8 5",
+            hearts: "7 6 4",
+            diamonds: "V 10 8 5",
+            clubs: "9 7 3"
+          }
+        ],
+        context: "Votre partenaire ouvre 2♣ fort artificiel. Vous avez 0 à 7H.",
+        question: "Quelle réponse négative devez-vous donner ?",
+        answers: ["2♦", "2♥", "2SA", "3♣"],
+        correct: 0,
+        explanation: "Sur 2♣ fort artificiel, 2♦ est la réponse négative artificielle."
+      },
+      {
+        title: "Donne 10 – Barrage faible",
+        hands: [
+          {
+            seat: "Sud (votre main)",
+            spades: "A V 10 8 7 4",
+            hearts: "8 5",
+            diamonds: "9 6 4",
+            clubs: "10 7 3"
+          }
+        ],
+        context: "Vous êtes donneur. Personne n’a parlé. Vous avez 6 piques et 7H.",
+        question: "Quelle ouverture de barrage correspond le mieux au tableau ?",
+        answers: ["1♠", "2♠", "3♠", "1SA"],
+        correct: 1,
+        explanation: "Les ouvertures de barrage 2♥/2♠ montrent 5–10H avec 6+ cartes dans la couleur."
+      },
+      {
+        title: "Donne 11 – Drury en 3e position",
+        hands: [
+          {
+            seat: "Nord (répondant)",
+            spades: "R 9 7",
+            hearts: "8 6 4",
+            diamonds: "A 10 7 3",
+            clubs: "D V 8"
+          }
+        ],
+        context: "Après un passe d’entrée, votre partenaire ouvre 1♠ en 3e position. Vous avez 11H et 3 cartes à pique.",
+        question: "Quelle convention utilisez-vous ?",
+        answers: ["2♣ Drury", "2♦ négatif", "2SA", "3♠ barrage"],
+        correct: 0,
+        explanation: "Le 2♣ Drury en 3e/4e position montre 10–12H avec 3+ atouts dans la majeure du partenaire."
+      },
+      {
+        title: "Donne 12 – Réponse forcing de manche",
+        hands: [
+          {
+            seat: "Nord (répondant)",
+            spades: "8 4",
+            hearts: "7 5",
+            diamonds: "R D 10 8 7",
+            clubs: "A D 6 3"
+          }
+        ],
+        context: "Votre partenaire ouvre 1♣. Vous avez 11H et 5 carreaux.",
+        question: "Quelle réponse forcing de manche est prévue dans le tableau ?",
+        answers: ["1♦", "2♦", "2♣", "1SA"],
+        correct: 1,
+        explanation: "Après 1♣, les réponses 2♦ / 2♥ / 2♠ montrent 5+ cartes et 10+H, forcing de manche."
+      }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let locked = false;
+
+    const qInfo = document.getElementById("qInfo");
+    const scoreInfo = document.getElementById("scoreInfo");
+    const progressBar = document.getElementById("progressBar");
+    const dealTitle = document.getElementById("dealTitle");
+    const dealBox = document.getElementById("dealBox");
+    const contextBox = document.getElementById("contextBox");
+    const questionBox = document.getElementById("questionBox");
+    const answersBox = document.getElementById("answersBox");
+    const feedbackBox = document.getElementById("feedbackBox");
+    const nextBtn = document.getElementById("nextBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const resultBox = document.getElementById("resultBox");
+
+    function renderHand(hand){
+      return `
+        <div class="hand">
+          <h3>${hand.seat}</h3>
+          <div class="suit"><span class="sym spade">♠</span><span class="cards">${hand.spades}</span></div>
+          <div class="suit"><span class="sym heart">♥</span><span class="cards">${hand.hearts}</span></div>
+          <div class="suit"><span class="sym diamond">♦</span><span class="cards">${hand.diamonds}</span></div>
+          <div class="suit"><span class="sym club">♣</span><span class="cards">${hand.clubs}</span></div>
+        </div>
+      `;
+    }
+
+    function renderQuestion(){
+      const item = quizData[current];
+      locked = false;
+      nextBtn.disabled = true;
+      feedbackBox.className = "feedback";
+      feedbackBox.innerHTML = "";
+      resultBox.className = "result";
+
+      qInfo.textContent = `Question ${current + 1} / ${quizData.length}`;
+      scoreInfo.textContent = `Score : ${score}`;
+      progressBar.style.width = `${(current / quizData.length) * 100}%`;
+
+      dealTitle.textContent = item.title;
+      dealBox.innerHTML = item.hands.map(renderHand).join("");
+      contextBox.textContent = item.context;
+      questionBox.textContent = item.question;
+
+      answersBox.innerHTML = "";
+      item.answers.forEach((ans, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "answer";
+        btn.textContent = ans;
+        btn.addEventListener("click", () => choose(idx));
+        answersBox.appendChild(btn);
+      });
+    }
+
+    function choose(index){
+      if(locked) return;
+      locked = true;
+
+      const item = quizData[current];
+      const buttons = [...document.querySelectorAll(".answer")];
+
+      buttons.forEach((btn, idx) => {
+        if(idx === item.correct) btn.classList.add("correct");
+        if(idx === index && idx !== item.correct) btn.classList.add("wrong");
+        btn.disabled = true;
+      });
+
+      const ok = index === item.correct;
+      if(ok) score++;
+
+      scoreInfo.textContent = `Score : ${score}`;
+      feedbackBox.className = `feedback show ${ok ? "ok" : "bad"}`;
+      feedbackBox.innerHTML = `
+        <strong>${ok ? "✅ Bonne réponse" : "❌ Réponse incorrecte"}</strong><br>
+        ${item.explanation}
+      `;
+
+      nextBtn.disabled = false;
+      progressBar.style.width = `${((current + 1) / quizData.length) * 100}%`;
+    }
+
+    function nextQuestion(){
+      current++;
+      if(current >= quizData.length){
+        showResult();
+      } else {
+        renderQuestion();
+      }
+    }
+
+    function showResult(){
+      dealTitle.textContent = "Quiz terminé";
+      dealBox.innerHTML = "";
+      contextBox.textContent = "";
+      questionBox.textContent = "";
+      answersBox.innerHTML = "";
+      feedbackBox.className = "feedback";
+      feedbackBox.innerHTML = "";
+      nextBtn.disabled = true;
+
+      const percent = Math.round((score / quizData.length) * 100);
+      let comment = "Continue l’entraînement sur les séquences standard.";
+      if(percent >= 85) comment = "Très bon niveau moyen : les bases SEF sont bien en place.";
+      else if(percent >= 65) comment = "Bon niveau : encore quelques automatismes à consolider.";
+      else if(percent >= 50) comment = "Base correcte, mais certaines réponses standard restent à revoir.";
+
+      resultBox.className = "result show";
+      resultBox.innerHTML = `
+        <h2>Résultat final</h2>
+        <p><strong>${score} / ${quizData.length}</strong> — ${percent}%</p>
+        <p class="small">${comment}</p>
+        <p class="small">Tu peux recommencer pour refaire toutes les donnes sur téléphone mobile.</p>
+      `;
+    }
+
+    function restartQuiz(){
+      current = 0;
+      score = 0;
+      renderQuestion();
+    }
+
+    nextBtn.addEventListener("click", nextQuestion);
+    restartBtn.addEventListener("click", restartQuiz);
+
+    renderQuestion();
+  </script>
+</body>
+</html>
